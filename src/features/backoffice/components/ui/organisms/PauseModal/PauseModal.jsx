@@ -69,7 +69,7 @@ export default function PauseModal({
             maxLength={1000}
             value={reason}
             onChange={(e) => setReason(e.target.value)}
-            placeHolder="Explica por qué se pausa el trabajo"
+            placeholder="Explica por qué se pausa el trabajo"
           />
         </FormField>
 
