@@ -171,11 +171,11 @@ export default function TimeAllocation({
             return (
               <li key={entry.id} className="time-allocation__row">
                 <div className="time-allocation__info">
-                  <span className="time-allocation__operator">
-                    {entry.authorName}
-                  </span>
-                  <span className="time-allocation__concept">
+                  <span className="time-allocation__primary">
                     {entry.concept}
+                  </span>
+                  <span className="time-allocation__secondary">
+                    {entry.authorName}
                   </span>
                 </div>
                 <span className="time-allocation__minutes">
