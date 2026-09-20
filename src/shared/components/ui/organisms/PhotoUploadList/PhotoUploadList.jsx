@@ -5,6 +5,7 @@ export default function PhotoUploadList({
   value = [],
   onChange,
   maxFiles = 3,
+  disabled = false,
 }) {
   const slots = value.length < maxFiles ? [...value, null] : value;
   const remaining = maxFiles - value.length;
@@ -32,6 +33,7 @@ export default function PhotoUploadList({
           value={file}
           accept="image/jpeg,image/png"
           multiple={file === null && remaining > 1}
+          disabled={disabled}
           onChange={(selected) => handleSlotChange(index, selected)}
         />
       ))}

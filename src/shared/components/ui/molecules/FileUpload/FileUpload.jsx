@@ -9,6 +9,7 @@ export default function FileUpload({
   accept = "image/*",
   maxSizeMB = 5,
   multiple = false,
+  disabled = false,
   label = "Añadir una foto",
   hint = "Ayuda a entender el problema más rápido",
 }) {
@@ -64,6 +65,7 @@ export default function FileUpload({
             type="file"
             accept={accept}
             multiple={multiple}
+            disabled={disabled}
             className="file-upload__input"
             aria-describedby={error ? errorId : undefined}
             onChange={handleSelect}
@@ -88,6 +90,7 @@ export default function FileUpload({
             <button
               type="button"
               className="file-upload__remove"
+              disabled={disabled}
               onClick={handleRemove}
             >
               <X size={16} aria-hidden="true" />

@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useForm, useWatch, Controller } from "react-hook-form";
 import TextField from "../../../../../../shared/components/ui/atoms/TextField/TextField.jsx";
 import TextArea from "../../../../../../shared/components/ui/atoms/TextArea/TextArea.jsx";
@@ -16,9 +17,12 @@ import PhoneField from "../../../../../../shared/components/ui/molecules/PhoneFi
 import { isPossiblePhoneNumber } from "react-phone-number-input";
 import PhotoUploadList from "../../../../../../shared/components/ui/organisms/PhotoUploadList/PhotoUploadList.jsx";
 import "./PhoneIncidentForm.scss";
+import { useFormDraft } from "../../../../../../hooks/useFormDraft.js";
 
 const DESC_MIN = 10;
 const DESC_MAX = 2000;
+
+const DRAFT_KEY = "phoneIncidentDraft";
 
 const NAME_FILTER = /[^\p{L}\p{M} '-]/gu;
 const NAME_PATTERN = /^[\p{L}\p{M} '-]+$/u;
@@ -42,30 +46,45 @@ export default function PhoneIncidentForm({
   submitError,
   onDiscard,
   loadingOptions = false,
+  frozen = false,
 }) {
+  const [draft, updateDraft, clearDraft] = useFormDraft(DRAFT_KEY, {
+    lodgingId: "",
+    operatorId: "",
+    openedDate: today(),
+    openedTime: new Date().toTimeString().slice(0, 5),
+    firstName: "",
+    lastName: "",
+    contact: "",
+    category: "",
+    priority: INCIDENT_PRIORITY.NORMAL,
+    description: "",
+  });
+
   const {
     register,
     handleSubmit,
     getValues,
     control,
     reset,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm({
     mode: "onTouched",
     defaultValues: {
-      lodgingId: "",
-      operatorId: "",
-      openedDate: today(),
-      openedTime: new Date().toTimeString().slice(0, 5),
-      firstName: "",
-      lastName: "",
-      contact: "",
-      category: "",
-      priority: INCIDENT_PRIORITY.NORMAL,
-      description: "",
+      ...draft,
       images: [],
     },
   });
+
+  useEffect(() => {
+    const subscription = watch((values) => {
+      const rest = { ...values };
+      delete rest.images;
+      updateDraft(rest);
+    });
+    return () => subscription.unsubscribe();
+  }, [watch]);
 
   const descriptionValue = useWatch({ control, name: "description" });
   const descriptionLength = (descriptionValue ?? "").length;
@@ -89,13 +108,19 @@ export default function PhoneIncidentForm({
 
   function handleDiscard() {
     reset();
+    clearDraft();
     onDiscard?.();
+  }
+
+  async function handleFormSubmit(values) {
+    const succeeded = await onSubmit(values);
+    if (succeeded) clearDraft();
   }
 
   return (
     <form
       className="phone-incident-form"
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit(handleFormSubmit)}
       noValidate
     >
       <NoticeBox tone="brand">
@@ -117,13 +142,15 @@ export default function PhoneIncidentForm({
         >
           <select
             className="text-field"
-            disabled={loadingOptions}
+            disabled={frozen || loadingOptions}
             {...register("lodgingId", {
               required: "Selecciona un alojamiento",
             })}
           >
             <option value="">
-              {loadingOptions ? "Cargando alojamientos..." : "Selecciona un alojamiento"}
+              {loadingOptions
+                ? "Cargando alojamientos..."
+                : "Selecciona un alojamiento"}
             </option>
             {lodgings.map((lodging) => (
               <option key={lodging.id} value={lodging.id}>
@@ -134,7 +161,11 @@ export default function PhoneIncidentForm({
         </FormField>
 
         <FormField id="operatorId" label="Operario asignado (opcional)">
-          <select className="text-field" {...register("operatorId")}>
+          <select
+            className="text-field"
+            disabled={frozen}
+            {...register("operatorId")}
+          >
             <option value="">
               {loadingOptions ? "Cargando operarios..." : "Sin asignar"}
             </option>
@@ -158,6 +189,7 @@ export default function PhoneIncidentForm({
             type="date"
             max={today()}
             invalid={!!errors.openedDate}
+            disabled={frozen}
             {...register("openedDate", {
               required: "La fecha de apertura es obligatoria",
               validate: (date) => {
@@ -181,6 +213,7 @@ export default function PhoneIncidentForm({
           <TextField
             type="time"
             invalid={!!errors.openedTime}
+            disabled={frozen}
             {...register("openedTime", {
               required: "La hora de apertura es obligatoria",
             })}
@@ -199,6 +232,7 @@ export default function PhoneIncidentForm({
             placeholder="Nombre del reportante"
             invalid={!!errors.firstName}
             autoComplete="given-name"
+            disabled={frozen}
             {...firstNameField}
             onChange={(e) => {
               if (!e.nativeEvent.isComposing) {
@@ -219,6 +253,7 @@ export default function PhoneIncidentForm({
             placeholder="Apellido"
             invalid={!!errors.lastName}
             autoComplete="family-name"
+            disabled={frozen}
             {...lastNameField}
             onChange={(e) => {
               if (!e.nativeEvent.isComposing) {
@@ -252,6 +287,7 @@ export default function PhoneIncidentForm({
                 invalid={!!errors.contact}
                 value={field.value}
                 onChange={field.onChange}
+                disabled={frozen}
               />
             )}
           />
@@ -265,6 +301,7 @@ export default function PhoneIncidentForm({
         >
           <select
             className="text-field"
+            disabled={frozen}
             {...register("category", {
               required: "Selecciona una categoría",
             })}
@@ -280,7 +317,12 @@ export default function PhoneIncidentForm({
       </div>
 
       <FormField id="priority" label="Prioridad">
-        <select className="text-field" {...register("priority")}>
+        <select
+          className="text-field"
+          disabled={frozen}
+          {...register("priority")}
+        >
+          {" "}
           {Object.values(INCIDENT_PRIORITY).map((value) => (
             <option key={value} value={value}>
               {INCIDENT_PRIORITY_LABEL[value]}
@@ -300,6 +342,7 @@ export default function PhoneIncidentForm({
         <TextArea
           invalid={!!errors.description}
           placeholder="Qué ocurre, desde cuándo, qué ha intentado el cliente"
+          disabled={frozen}
           {...register("description", {
             required: "La descripción es obligatoria",
             minLength: {
@@ -320,7 +363,11 @@ export default function PhoneIncidentForm({
           name="images"
           control={control}
           render={({ field }) => (
-            <PhotoUploadList value={field.value} onChange={field.onChange} />
+            <PhotoUploadList
+              value={field.value}
+              onChange={field.onChange}
+              disabled={frozen}
+            />
           )}
         />
       </fieldset>
@@ -329,11 +376,7 @@ export default function PhoneIncidentForm({
         <Button type="submit" variant="primary" disabled={isSubmitting}>
           Registrar incidencia
         </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={handleDiscard}
-        >
+        <Button type="button" variant="secondary" onClick={handleDiscard}>
           Descartar
         </Button>
       </div>
