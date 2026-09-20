@@ -56,13 +56,13 @@
     flex: 1 1 auto;
   }
 
-  &__operator {
+  &__primary {
     @include mix.text-style("body", "backoffice");
     color: var(--color-text-strong);
     font-weight: vars.weight("semibold");
   }
 
-  &__concept {
+  &__secondary {
     @include mix.text-style("field-label", "backoffice");
     font-weight: vars.weight("regular");
     color: var(--color-text-muted);
