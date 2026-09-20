@@ -15,6 +15,7 @@ import {
 import { useAuthStore } from "../../../auth/store/authStore.js";
 import { ROLES } from "../../../../shared/constants/nav.js";
 import LoadErrorNotice from "../../../../shared/components/ui/molecules/LoadErrorNotice/LoadErrorNotice.jsx";
+import LodgingStatusFilter from "../../components/ui/molecules/LodgingStatusFilter/LodgingStatusFilter.jsx";
 
 function toRowProps(lodging) {
   return {
@@ -29,6 +30,12 @@ const BACKEND_TO_FORM_FIELD = {
   ref: "reference",
   accessNotes: "notes",
 };
+
+const STATUS_FILTER_OPTIONS = [
+  { value: "all", label: "Todos" },
+  { value: "active", label: "Activos" },
+  { value: "inactive", label: "Inactivos" },
+];
 
 export default function LodgingsPage() {
   const role = useAuthStore((s) => s.user?.role);
@@ -46,6 +53,8 @@ export default function LodgingsPage() {
   const [confirmTarget, setConfirmTarget] = useState(null);
 
   const [search, setSearch] = useState("");
+
+  const [statusFilter, setStatusFilter] = useState("all");
 
   async function loadLodgings() {
     setLoading(true);
@@ -140,8 +149,15 @@ export default function LodgingsPage() {
     }
   }
   const term = search.trim().toLowerCase();
+
+  const byStatus = lodgings.filter((lodging) => {
+    if (statusFilter === "active") return lodging.active;
+    if (statusFilter === "inactive") return !lodging.active;
+    return true;
+  });
+
   const filteredLodgings = term
-    ? lodgings.filter((lodging) => {
+    ? byStatus.filter((lodging) => {
         const statusLabel = lodging.active ? "activo" : "inactivo";
         return (
           lodging.ref?.toLowerCase().includes(term) ||
@@ -150,11 +166,29 @@ export default function LodgingsPage() {
           statusLabel.includes(term)
         );
       })
-    : lodgings;
+    : byStatus;
+
+  const statusCounts = {
+    all: lodgings.length,
+    active: lodgings.filter((l) => l.active).lenght,
+    inactive: lodgings.filter((l) => !l.active).lenght,
+  };
+
+  const sortedLodgings = [...filteredLodgings].sort((a, b) => {
+    if (a.active !== b.active) return a.active ? -1 : 1;
+    return (a.ref ?? "").localeCompare(b.ref ?? "");
+  });
 
   return (
     <div className="lodgings-page">
       <div className="lodgings-page__toolbar">
+        <LodgingStatusFilter
+          value={statusFilter}
+          onChange={setStatusFilter}
+          options={STATUS_FILTER_OPTIONS}
+          counts={statusCounts}
+        />
+
         <SearchBar
           search={search}
           onSearchChange={(e) => setSearch(e.target.value)}
@@ -188,12 +222,16 @@ export default function LodgingsPage() {
           <p>No se encontraron alojamientos para "{search}".</p>
         )}
       <div className="lodgings-page__list">
-        {filteredLodgings.map((lodging) => (
+        {sortedLodgings.map((lodging) => (
           <LodgingRow
             key={lodging.id}
             {...toRowProps(lodging)}
-            onEdit={isAdmin ? () => openEdit(lodging) : undefined}
-            onChangePin={isAdmin ? () => openPin(lodging) : undefined}
+            onEdit={
+              isAdmin && lodging.active ? () => openEdit(lodging) : undefined
+            }
+            onChangePin={
+              isAdmin && lodging.active ? () => openPin(lodging) : undefined
+            }
             onToggleActive={
               isAdmin && lodging.active
                 ? () => setConfirmTarget(lodging)
