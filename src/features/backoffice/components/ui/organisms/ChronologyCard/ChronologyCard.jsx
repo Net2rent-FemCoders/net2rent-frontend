@@ -110,7 +110,7 @@ export default function ChronologyCard({
         </form>
       ) : (
         <p className="chronology__closed" role="note">
-          La incidencia está cerrada: no se pueden añadir comentarios.
+          No se pueden añadir comentarios en este estado.
         </p>
       )}
 

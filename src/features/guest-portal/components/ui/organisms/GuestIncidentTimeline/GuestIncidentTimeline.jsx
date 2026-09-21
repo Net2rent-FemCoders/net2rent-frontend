@@ -10,12 +10,6 @@ const TERMINAL = {
     Icon: CheckCircle,
     dateField: "resolvedAt",
   },
-  CLOSED: {
-    key: "closed",
-    label: "Cerrada",
-    Icon: CheckCircle,
-    dateField: "closedAt",
-  },
   REJECTED: {
     key: "rejected",
     label: "Rechazada",

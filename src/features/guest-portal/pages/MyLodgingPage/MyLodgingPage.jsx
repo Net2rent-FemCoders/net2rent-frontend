@@ -98,7 +98,7 @@ export default function MyLodgingPage() {
           <h2 className="my-lodging-page__section-title">Tus incidencias</h2>
           {status === "success" && (
             <span className="my-lodging-page__count">
-              {incidents.length} incidencias
+              {incidents.length} {incidents.length === 1 ? "incidencia" : "incidencias"}
             </span>
           )}
         </div>
@@ -145,15 +145,16 @@ export default function MyLodgingPage() {
                 />
               ))}
             </ul>
-
+          </>
+        )}
+        {status === "success" && (
             <TextButton
-              className="my-lodging-page__logout"
-              onClick={() => setConfirmOpen(true)}
+                className="my-lodging-page__logout"
+                onClick={() => setConfirmOpen(true)}
             >
               <LogOut size={16} aria-hidden="true" />
               Salir
             </TextButton>
-          </>
         )}
       </div>
 

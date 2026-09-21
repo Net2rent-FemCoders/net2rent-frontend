@@ -1,9 +1,11 @@
 import axios from "axios";
 import { getGuestToken, clearGuestSession } from "./guestAuthStorage";
+import { REQUEST_TIMEOUT_MS } from "../../../shared/constants/network.js";
 
 const guestHttpClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   headers: { "Content-Type": "application/json" },
+  timeout: REQUEST_TIMEOUT_MS,
 });
 
 guestHttpClient.interceptors.request.use((config) => {
@@ -22,7 +24,7 @@ guestHttpClient.interceptors.response.use(
       }
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export default guestHttpClient;

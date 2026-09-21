@@ -41,7 +41,7 @@ export default function LoginPage() {
             onSubmit={handleSubmit}
             submitError={error}
             isSubmitting={status === 'loading'}
-            onForgot={() => { /* pendiente: ruta de recuperación de contraseña */ }}
+            onForgot={() => { /* Pending: password recovery flow */ }}
           />
         </section>
       </div>

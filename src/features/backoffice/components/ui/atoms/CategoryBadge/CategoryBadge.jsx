@@ -2,7 +2,7 @@ import { INCIDENT_CATEGORY_LABEL } from '../../../../../../shared/constants/inci
 import './CategoryBadge.scss';
 
 export default function CategoryBadge({ category, className = '' }) {
-    if (!category) return null;                       // sin categoría -> no pinta nada
+    if (!category) return null;
     const label = INCIDENT_CATEGORY_LABEL[category];
     if (!label) return null;
 

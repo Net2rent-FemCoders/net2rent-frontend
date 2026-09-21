@@ -8,6 +8,8 @@
 
   &__toolbar {
     display: flex;
+    flex-direction: column;
+    gap: vars.space(12);
 
     .search-bar {
       width: 100%;

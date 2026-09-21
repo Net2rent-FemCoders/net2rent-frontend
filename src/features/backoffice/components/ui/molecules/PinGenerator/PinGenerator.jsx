@@ -28,7 +28,7 @@ export default function PinGenerator({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Si el portapapeles falla (permiso denegado), no hacemos nada
+      // If clipboard access fails (permission denied), we do nothing.
     }
 
     }

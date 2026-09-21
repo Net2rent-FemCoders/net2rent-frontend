@@ -3,12 +3,11 @@
 
 .category-badge {
     @include mix.badge-shape;
-    background: rgba(vars.$bo-navy, 0.12);  // claro: azul translúcido
+    background: rgba(vars.$bo-navy, 0.12);
     color: vars.$bo-navy;
 
     @include mix.when-dark {
-        // dark: fondo claro sólido (sin opacidad) + texto oscuro -> muy visible
-        background: vars.$bo-brand-soft;     // #eef1fd (azul muy claro)
-        color: vars.$bo-navy-deep;           // #172154 (navy casi negro, alto contraste)
+        background: vars.$bo-brand-soft;
+        color: vars.$bo-navy-deep;
     }
 }

@@ -25,7 +25,6 @@ export function useIncidentTimeline(incidentId) {
         return () => { active = false; };
     }, [incidentId, fetchTimeline]);
 
-    // Recarga manual tras una acción que haya escrito historial
     const reload = useCallback(async () => {
         setError(null);
         try {

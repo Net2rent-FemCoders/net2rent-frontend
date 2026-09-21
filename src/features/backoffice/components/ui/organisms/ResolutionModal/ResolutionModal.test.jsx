@@ -91,7 +91,6 @@ describe("ResolutionModal", () => {
       target: { value: "Cambiado el filtro" },
     });
 
-    // cerrar y reabrir
     rerender(
       <ResolutionModal
         isOpen={false}

@@ -137,8 +137,20 @@ export default function IncidentDetailPage() {
     incident.status === INCIDENT_STATUS.CLOSED ||
     incident.status === INCIDENT_STATUS.REJECTED;
 
-  const checklistLocked =
+  const isWorkLocked =
     isTerminal || incident.status === INCIDENT_STATUS.RESOLVED;
+
+  const inProgress = incident.status === INCIDENT_STATUS.IN_PROGRESS;
+
+  const workLocked = isOperator ? !inProgress : isWorkLocked;
+
+  const operatorWorkHint = !isOperator
+    ? null
+    : incident.status === INCIDENT_STATUS.ASSIGNED
+      ? "Comienza la incidencia para imputar tiempos, editar el checklist y añadir comentarios."
+      : incident.status === INCIDENT_STATUS.PAUSED
+        ? "Reanuda la incidencia para volver a registrar trabajo."
+        : null;
 
   const canReject =
     canTriage &&
@@ -311,6 +323,8 @@ export default function IncidentDetailPage() {
         </NoticeBox>
       )}
 
+      {operatorWorkHint && <NoticeBox tone="brand">{operatorWorkHint}</NoticeBox>}
+
       {(incident.status === INCIDENT_STATUS.RESOLVED ||
         incident.status === INCIDENT_STATUS.CLOSED) &&
         incident.resolutionNote && (
@@ -403,7 +417,7 @@ export default function IncidentDetailPage() {
         error={checklistError}
         adding={checklistAdding}
         pendingIds={checklistPendingIds}
-        disabled={checklistLocked}
+        disabled={workLocked}
         onAdd={addChecklistItem}
         onToggle={toggleChecklistItem}
         onRemove={removeChecklistItem}
@@ -417,7 +431,7 @@ export default function IncidentDetailPage() {
           loading={timelineLoading}
           error={timelineError}
           submitting={timelineSubmitting}
-          canComment={!isTerminal}
+          canComment={!workLocked}
         />
 
         <TimeAllocation
@@ -426,7 +440,7 @@ export default function IncidentDetailPage() {
           error={timeError}
           adding={timeAdding}
           pendingIds={timePendingIds}
-          disabled={isTerminal}
+          disabled={workLocked}
           onImpute={addTimeEntry}
           onUpdate={updateTimeEntry}
           onRemove={removeTimeEntry}

@@ -94,7 +94,7 @@
 
   &__panel-meta {
     margin: 0;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--color-text-muted);
     @include mix.text-style("body");
     font-size: 13px;
   }

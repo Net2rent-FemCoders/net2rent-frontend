@@ -33,7 +33,6 @@ export function useIncidentTimeEntries(incidentId) {
     };
   }, [incidentId]);
 
-  // marca/desmarca una fila como "ocupada"
   const markPending = useCallback((entryId, isPending) => {
     setPendingIds((prev) => {
       const next = new Set(prev);

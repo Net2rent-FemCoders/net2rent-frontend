@@ -57,11 +57,11 @@ export default function Modal({
         }
         if (event.key !== 'Tab') return;
 
-        const focusables = getFocusable(dialogRef.current);
-        if (focusables.length === 0) return;
+        const focusable = getFocusable(dialogRef.current);
+        if (focusable.length === 0) return;
 
-        const first = focusables[0];
-        const last = focusables[focusables.length - 1];
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
 
         if (event.shiftKey && document.activeElement === first) {
             event.preventDefault();

@@ -11,6 +11,7 @@ import { useAuthStore } from "../../../auth/store/authStore.js";
 import { ROLES } from "../../../../shared/constants/nav.js";
 import "./NewIncidentPage.scss";
 import LoadErrorNotice from "../../../../shared/components/ui/molecules/LoadErrorNotice/LoadErrorNotice.jsx";
+import { useNetworkAwareSubmit } from "../../../../hooks/useNetworkAwareSubmit.js";
 
 export default function NewIncidentPage() {
   const role = useAuthStore((s) => s.user?.role);
@@ -18,7 +19,6 @@ export default function NewIncidentPage() {
   const [lodgings, setLodgings] = useState([]);
   const [operators, setOperators] = useState([]);
   const [loadError, setLoadError] = useState(null);
-  const [submitError, setSubmitError] = useState(null);
   const [createdCode, setCreatedCode] = useState(null);
   const [formKey, setFormKey] = useState(0);
   const [loadingOptions, setLoadingOptions] = useState(true);
@@ -49,22 +49,8 @@ export default function NewIncidentPage() {
     return <Navigate to="/backoffice/incidencias" replace />;
   }
 
-  async function handleSubmit(values) {
-    setSubmitError(null);
-    try {
-      const incident = await createPhoneIncident(values);
-      setCreatedCode(incident.code);
-    } catch (err) {
-      const message =
-        err.response?.data?.message ??
-        "No se pudo registrar la incidencia. Inténtalo de nuevo.";
-      setSubmitError(message);
-    }
-  }
-
   function registerAnother() {
     setCreatedCode(null);
-    setSubmitError(null);
     setFormKey((k) => k + 1);
   }
 
@@ -92,16 +78,45 @@ export default function NewIncidentPage() {
           </Button>
         </div>
       ) : (
-        <PhoneIncidentForm
+        <PhoneIncidentFormWithNetworkAwareness
           key={formKey}
           lodgings={lodgings}
           operators={operators}
           loadingOptions={loadingOptions}
-          onSubmit={handleSubmit}
-          submitError={submitError}
-          onDiscard={() => setSubmitError(null)}
+          onCreated={setCreatedCode}
+          onDiscard={() => setFormKey((k) => k + 1)}
         />
       )}
     </section>
+  );
+}
+
+function PhoneIncidentFormWithNetworkAwareness({
+  lodgings,
+  operators,
+  loadingOptions,
+  onCreated,
+  onDiscard,
+}) {
+  const { submit, frozen, error } = useNetworkAwareSubmit(createPhoneIncident, {
+    fallbackMessage: "No se pudo registrar la incidencia. Inténtalo de nuevo.",
+    onSuccess: (incident) => onCreated(incident.code),
+  });
+
+  async function handleFormSubmit(values) {
+    const { ok } = await submit(values);
+    return ok;
+  }
+
+  return (
+    <PhoneIncidentForm
+      lodgings={lodgings}
+      operators={operators}
+      loadingOptions={loadingOptions}
+      onSubmit={handleFormSubmit}
+      submitError={error}
+      frozen={frozen}
+      onDiscard={onDiscard}
+    />
   );
 }

@@ -12,8 +12,6 @@ export const INCIDENT_PRIORITY_LABEL = {
     [INCIDENT_PRIORITY.URGENT]: 'Urgente',
 };
 
-export const PRIORITY_UNSET_LABEL = 'Prioridad pendiente';
-
 export function toPriorityModifier(priority) {
     return priority ? priority.toLowerCase() : 'unset';
 }

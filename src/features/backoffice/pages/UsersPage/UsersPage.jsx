@@ -189,7 +189,7 @@ export default function UsersPage() {
         setConfirmTarget(user);
         return;
       } catch {
-        // Si falla el conteo, seguimos con el flujo normal (0 incidencias)
+        // If the count fails, we proceed with the normal flow, assuming 0 incidents.
       }
     }
     setOperatorIncidentCount(0);
